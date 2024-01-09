@@ -1,0 +1,112 @@
+MULTITHREADING(Thread in c++11):
+-------------------------------
+1.In every application there is a default thread which is main(), inside this we create another threads.
+2.Thread is a lightweight process. Idea of thread is to achieve parallesim by dividing process into multiple threads.
+
+
+WAYS TO CREATE THREAD IN C++11:
+--------------------------------
+1.Function pointers
+2.Lambda functions
+3.Functors
+4.Member functions
+5.Static member functions
+
+
+
+
+
+
+
+
+
+Eg:print odd and even numbers without using thread
+#include<iostream>
+#include<thread>
+using namespace std;
+void oddNums(int start,int end)
+{
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2!=0)
+        {
+            cout<<i<<endl;
+        }
+    }
+}
+void evenNums(int start,int end)
+{
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2==0)
+        {
+            cout<<i<<endl;
+        }
+    }
+}
+int main()
+{
+    oddNums(1,10);
+    evenNums(1,10);
+    return 0;
+}
+
+o/p:
+1
+3
+5
+7
+9
+2
+4
+6
+8
+10
+
+
+
+
+Eg:print odd and even numbers  using thread(using function pointer)
+#include<iostream>
+#include<thread>
+using namespace std;
+void oddNums(int start,int end)
+{
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2!=0)
+        {
+            cout<<i<<endl;
+        }
+    }
+}
+void evenNums(int start,int end)
+{
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2==0)
+        {
+            cout<<i<<endl;
+        }
+    }
+}
+int main()
+{
+    thread t1(oddNums,1,10);
+    thread t2(evenNums,2,10);
+    t1.join();
+    t2.join();
+
+    return 0;
+}
+o/p:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
