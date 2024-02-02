@@ -1,16 +1,25 @@
-MULTITHREADING(Thread in c++11):
--------------------------------
+                                                                                    1. MULTITHREADING(Thread in c++11)
+
+
+
 1.In every application there is a default thread which is main(), inside this we create another threads.
 2.Thread is a lightweight process. Idea of thread is to achieve parallesim by dividing process into multiple threads.
 
 
-WAYS TO CREATE THREAD IN C++11:
---------------------------------
+
+.................................................................................................................................................................................................................
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+                                                                           2.WAYS TO CREATE THREAD IN C++11:
+
 1.Function pointers
 2.Lambda functions
-3.Functors
-4.Member functions
+3.Functors(objects)
+4.non-static Member functions
 5.Static member functions
+6.using async
 
 
 
@@ -66,7 +75,7 @@ o/p:
 
 
 
-Eg:print odd and even numbers  using thread(using function pointer)
+Eg1:print odd and even numbers  using thread(using function pointer)
 #include<iostream>
 #include<thread>
 using namespace std;
@@ -110,47 +119,13 @@ o/p:
 8
 9
 10
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-The threads library was introduced in the C++11 standard, which was released in 2011. The motivation to add threads in C++ was to provide a standardized, portable, and efficient way to write concurrent programs in C++. Prior to the C++11 standard, the C++ language did not provide a standard way to create and manage threads, and developers had to rely on platform-specific APIs such as POSIX threads or Windows threads. This made it difficult to write portable and maintainable concurrent code. With the addition of the thread library to the C++ standard, developers can now write portable and standardized multithreaded code that can run on any platform that supports the C++ standard library.
-Additionally, the rise of multicore processors made multithreaded programming an important technique for improving the performance of software applications. The addition of the thread library to C++ provides developers with a powerful tool for writing efficient and scalable multithreaded code that can take advantage of the increased processing power of modern CPUs.
 
 
 
-*How to create thread in C++ std?
-    There are several ways to create threads in C++ using the standard library.
 
-    Let me list down few of them here:
+Eg3: using functor(objects)
 
-    1.Using the function std::thread constructor: This is the most common way to create threads in C++. You can pass a function or a lambda expression to the constructor, and a new thread will be created that will execute that function or lambda expression.
-     ------------------------------------------
-    Eg:
-    #include<iostream>
-    #include <thread>
-
-    void my_thread_function(int* pData)
-    {
-        std::cout << "Hello from my_thread_function! 
-        and data passd ="<<*pData << std::endl;
-    }
-
-    int main()
-    {
-        int data = 101;
-        std::thread my_thread(my_thread_function,&data);
-        my_thread.join();
-        return 0;
-    }
-     O/P - Hello from my_thread_function! and data passd =101
-
-
-    2. USING FUNCTOR: In C++, a functor is an object that can be treated like a function or a function pointer. Functors are also known as function objects, as they encapsulate a function or a code block within an object, which can be called like a regular function.
-      --------------
-        Functors are often used in C++ to provide a more flexible and object-oriented way of calling functions. They can be used to provide additional state or context to a function, which can be helpful in some cases, such as when working with algorithms that require a comparison function or when implementing callbacks and of course in this case thread creation.
-        To create a functor in C++, you define a class with an overloaded operator() function. This allows instances of the class to be called like a regular function.
-
-
-
-    Eg:
+   Eg:
     #include <iostream>
     #include <thread>
 
@@ -169,11 +144,10 @@ Additionally, the rise of multicore processors made multithreaded programming an
     o/p:Hello from thread!
 
 
-    3.USING aA LAMBDA FUNCTION:
-     --------------------------
-    Allows you to define an anonymous function on the fly. It is a shorthand way of defining a function object (a functor) without having to define a separate class or function for it. Lambda functions can be used wherever a function object is required, such as in STL algorithms, for callbacks, threads or for creating closures. Lambda functions can capture variables from their enclosing scope by value or by reference and can have parameters and a return value.
 
-    Eg:
+
+    Eg2:using Lambda
+
     #include <iostream>
     #include <thread>
     using namespace std;
@@ -186,11 +160,9 @@ Additionally, the rise of multicore processors made multithreaded programming an
     }
     o/p:Hello from thread
 
-    4.USING MEMBER FUNCTION AND OBJECT:
-      --------------------------------In the below example of creating a thread using a member function and an object, &my_object is passed as the second parameter to std::thread() because we need to provide the instance of the class on which the member function should be called.
-    When we pass a member function to the std::thread() constructor, we also need to provide the object on which that function should be called. The second parameter to the std::thread() constructor is a pointer to the object on which the member function should be called.
 
-    Eg:
+Eg4: using non-static member function
+Eg:
     #include <iostream>
     #include <thread>
     using namespace std;
@@ -212,10 +184,11 @@ Additionally, the rise of multicore processors made multithreaded programming an
     o/p:Hello from thread! sivakrishnateja
 
 
-    5.USING AN ASYNC FUNCTION:
-     ------------------------ Using the function async: This function creates a new thread and returns a future object that can be used to retrieve the result of the thread's execution.
 
-    Eg:
+
+Eg6: using Async
+
+Eg:
     #include <iostream>
     #include <thread>
     #include<future>
@@ -234,3 +207,288 @@ Additionally, the rise of multicore processors made multithreaded programming an
 
     o/p:Inside main func
         Result :102
+
+
+Eg5: using static member functions
+
+
+ #include <iostream>
+    #include <thread>
+    using namespace std;
+    class Myclass
+    {
+        public:
+        static void func(string s)
+        {
+            cout<<"Hello from thread! "<<s<<endl;
+        }
+    };
+
+    int main() {
+        
+    std::thread t(&Myclass::func,"sivakrishnateja");
+        t.join();
+        return 0;
+    }
+    o/p:Hello from thread! sivakrishnateja
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                3.JOIN AND DETACH IN C++
+
+
+
+JOIN Notes:
+    1.Once a created is started we wait for this thread to finish by calling join() function  on thread object. 
+    2.Double join will result into program termination.
+    3.If needed we should check thread is joinable before joining(using joinable() function).
+
+
+
+
+
+
+
+
+
+
+
+Eg:
+#include<bits/stdc++.h>
+using namespace std;
+void run(int x)
+{
+    while(x >=1)
+    {
+        cout<<endl<<x<<" Teja"<<endl;
+        x--;
+        this_thread::sleep_for(chrono::seconds(3)); //it will take 3 seconds after that only "After main" will execute
+    }
+}
+int main()
+{
+thread t(run,5);
+cout<<"Main"<<endl;
+t.join();
+cout<<"After main\n";
+}
+
+o/p:
+
+Main
+5 Teja
+4 Teja
+3 Teja
+2 Teja
+1 Teja
+After main
+
+
+
+
+
+Eg2:
+#include<bits/stdc++.h>
+using namespace std;
+void run(int x)
+{
+    while(x-- >0)
+    {
+        cout<<endl<<x<<" Teja"<<endl;
+        
+        this_thread::sleep_for(chrono::seconds(3));
+    }
+}
+int main()
+{
+thread t(run,10);
+cout<<"Main"<<endl;
+t.join();
+t.join();
+cout<<"After main\n";
+}
+o/p:
+Main
+9 Teja
+8 Teja
+7 Teja
+6 Teja
+5 Teja
+4 Teja
+3 Teja
+2 Teja
+1 Teja
+0 Teja
+terminate called after throwing an instance of 'std::system_error'
+  what():  Invalid argument
+Aborted (core dumped)
+
+
+
+
+Eg3:
+#include<bits/stdc++.h>
+using namespace std;
+void run(int x)
+{
+    while(x-- >0)
+    {
+        cout<<endl<<x<<" Teja"<<endl;
+        
+        this_thread::sleep_for(chrono::seconds(3));
+    }
+}
+int main()
+{
+thread t(run,10);
+cout<<"Main"<<endl;
+t.join();
+cout<<"Hii from inside main\n";
+if(t.joinable()) //It it is already join,then only it will
+t.join();
+cout<<"After main\n";
+}
+
+o/p:
+Main
+9 Teja
+8 Teja
+7 Teja
+6 Teja
+5 Teja
+4 Teja
+3 Teja
+2 Teja
+1 Teja
+0 Teja
+Hii from inside main
+After main
+
+
+
+
+DETACH Notes:
+    1.This is used to detach newly created thread from the parent thread.
+    2.Always check before detaching thread  that it is joinable otherwise we may end up double detaching and double detach()  will result into program termination.
+    3.If we have detached thread and main function is returning then the detaced h thread execution is suspension.
+
+
+Eg1:
+#include<bits/stdc++.h>
+using namespace std;
+void run(int x)
+{
+    while(x-- >0)
+    {
+        cout<<endl<<x<<" Teja"<<endl;
+        
+        this_thread::sleep_for(chrono::seconds(2));
+    }
+}
+int main()
+{
+thread t(run,10);
+cout<<"Main"<<endl;
+t.detach();
+
+cout<<"After main\n";
+}
+
+Note: the output behaviour was different every time.
+o/p 1:
+Main
+After main
+9 Teja
+8 Teja
+7 Teja
+6 Teja
+5 Teja
+4 Teja
+3 Teja
+2 Teja
+1 Teja
+0 Teja
+
+o/p 2:
+Main
+After main
+
+
+
+Eg2:
+#include<bits/stdc++.h>
+using namespace std;
+void run(int x)
+{
+    while(x-- >0)
+    {
+        cout<<endl<<x<<" Teja"<<endl;
+        
+        this_thread::sleep_for(chrono::seconds(2));
+    }
+}
+int main()
+{
+thread t(run,10);
+cout<<"Main"<<endl;
+t.detach();
+if(t.joinable())
+t.detach();
+
+cout<<"After main\n";
+}
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                                4.MUTEX IN C++
+
+
+
+
+* Mutex in c++ Threading  | Why use Mutex | What is Race condition  and how to solve it ? | what is critical section
+
+
+1. What is mutex ?
+    *Mutex stans for mutual exclusion.
+    *It can be accessing something mutually ,first you and next follows.
+
+
+2.why mutex is used?
+    *Mutex is used to avoid race condition.
+    *we use lock() unlock() on mutex to avoid race condition.
+
+
+3.Race condition:
+    *Race condition is a situation,where two or more threads process happend to change a common data at same time.
+
+
+4. Critical section:
+    *If there is a race condition then we have to protect it and the protected section is called critical section.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+    
+
+
+
