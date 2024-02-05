@@ -12,7 +12,9 @@
 
 
 
-                                                                           2.WAYS TO CREATE THREAD IN C++11:
+                                                                                  2.WAYS TO CREATE THREAD IN C++11
+
+
 
 1.Function pointers
 2.Lambda functions
@@ -119,6 +121,7 @@ o/p:
 8
 9
 10
+
 
 
 
@@ -241,7 +244,7 @@ Eg5: using static member functions
 
 
 JOIN Notes:
-    1.Once a created is started we wait for this thread to finish by calling join() function  on thread object. 
+    1.Once a thread is started we wait for this thread to finish by calling join() function  on thread object. 
     2.Double join will result into program termination.
     3.If needed we should check thread is joinable before joining(using joinable() function).
 
@@ -372,7 +375,7 @@ After main
 DETACH Notes:
     1.This is used to detach newly created thread from the parent thread.
     2.Always check before detaching thread  that it is joinable otherwise we may end up double detaching and double detach()  will result into program termination.
-    3.If we have detached thread and main function is returning then the detaced h thread execution is suspension.
+    3.If we have detached thread and main function is returning then the detaced  thread execution is suspension.
 
 
 Eg1:
@@ -456,7 +459,7 @@ cout<<"After main\n";
 
 
 1. What is mutex ?
-    *Mutex stans for mutual exclusion.
+    *Mutex stands for mutual exclusion.
     *It can be accessing something mutually ,first you and next follows.
 
 
@@ -476,9 +479,617 @@ cout<<"After main\n";
 
 
 
+Eg1:
+#include<iostream>
+#include<thread>
+using namespace std;
+int money=0;
+void addMoney()
+{
+    ++money;
+}
+int main()
+{
+    thread t1(addMoney);
+    thread t2(addMoney);
+    t1.join();
+    t2.join();
+    cout<<money<<endl;
+    return 0;
+
+}
+
+
+o/p:2 [Note:Sometimes will give different result as output,because both threads are accessing samething mutually.]
 
 
 
+
+Eg2:using mutex
+
+#include<iostream>
+#include<thread>
+#include<mutex>
+using namespace std;
+int money=0;
+mutex m;
+void addMoney()
+{
+    m.lock();
+    ++money;
+    m.unlock();
+}
+int main()
+{
+    thread t1(addMoney);
+    thread t2(addMoney);
+    t1.join();
+    t2.join();
+    cout<<money<<endl;
+    return 0;
+
+}
+
+o/p: 2
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                   5.Mutex try_lock 
+
+* std::mutex::try_lock() on c++ multithreading:
+
+  1.try_lock() tries to lock on mutex.Returns immediately.on successful lock acquistion returns true otherwiae returns false.
+  2.If try_lock() is not able to lock on mutex,then its doesn't get blocked that's why it is called non-blocking.
+  3.If try_lock() is called again on same thread which owns the mutex, the behaviour is undefined.It is a dead lock situation with undefined behaviour.
+
+Eg:
+#include<iostream>
+#include<thread>
+#include<mutex>
+using namespace std;
+int money=0;
+mutex m;
+void addMoney()
+{
+    for(int i=1;i<=10;i++)
+    {
+        if(m.try_lock())
+        {
+            ++money;
+            m.unlock();
+        }
+    }
+    
+}
+int main()
+{
+    thread t1(addMoney);
+    thread t2(addMoney);
+    t1.join();
+    t2.join();
+    cout<<money<<endl;
+    return 0;
+
+}
+
+o/p:20
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                    6. try_lock in mutex
+
+*std::try_lock() in c++11 multithreading:
+
+1.std::try_lock() tries to lock all lockable objects passed in it one by one in given order.
+
+    syntax: std::try_lock(m1,m2,m3.........mn)
+
+2.On success this function returns -1 otherwise it will return 0-based mutex index number which it could not lock.
+3.If it fails to lock any of the mutex then it will release all the mutex it locked before.
+4.If a call to try_lock results in exception , unlock is called fro any locked objects before rethrowing.
+
+
+
+Eg:
+#include <iostream>
+#include <mutex>
+#include <thread>
+
+std::mutex mutex1;
+std::mutex mutex2;
+
+void example_function(int id) {
+    std::unique_lock<std::mutex> lock1(mutex1, std::defer_lock);
+    std::unique_lock<std::mutex> lock2(mutex2, std::defer_lock);
+
+    // Attempt to lock both mutexes without blocking
+    if (std::try_lock(lock1, lock2) == -1) {
+        // Lock acquired for both mutexes
+        // Perform critical section operations
+        std::cout << "Thread " << id << " acquired locks.\n";
+
+        // Simulate some work
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+        // Release locks explicitly (optional)
+        lock1.unlock();
+        lock2.unlock();
+    } else {
+        // Failed to acquire both locks
+        std::cout << "Thread " << id << " failed to acquire locks.\n";
+    }
+}
+
+int main() {
+    std::thread t1(example_function, 1);
+    std::thread t2(example_function, 2);
+
+    t1.join();
+    t2.join();
+
+    return 0;
+}
+
+o/p:
+Thread 1 acquired locks.
+Thread 2 failed to acquire locks.
+
+
+
+NOTE:
+
+*Timing of Execution:
+
+  thread1 starts and attempts to acquire locks.
+  It successfully acquires both locks and enters the critical section.
+  While thread1 is still in the critical section, thread2 starts and attempts to acquire the locks.
+  Since thread1 is still holding the locks, thread2 fails to acquire both locks.
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                  9.Lock Guard in c++
+
+*TOPIC: lock_guard in c++ (std::lock_guard<mutex>lock(m1))
+
+  0.It is very light-weight wrapper for owing  mutex on scoped basis.
+  1.It acquires mutex lock the moment you create the object of the lock guard.
+  2.It automatically removes the  lock while goes out of scope.
+  3.you can not explicity  unlock the lock guard.
+  4.you cannot copy lock guard.
+
+
+
+Eg: I used mutex in this prgm
+
+#include <bits/stdc++.h>
+using namespace std;
+  
+int buffer=0;
+mutex m;
+void Increment(const char* threadNumber,int val)
+{
+    m.lock();
+    for(int i=1;i<=val;i++)
+    {
+        buffer++;
+    }
+    m.unlock();
+}
+
+int main() {
+  thread t1(Increment,"T0",10);
+  thread t2(Increment,"T1",10);
+  t1.join();
+  t2.join();
+  cout<<"Buffer value is :"<<buffer;
+
+    
+    return 0;
+}
+
+o/p:20
+
+
+
+Eg: In this program iam using lock_guard
+
+#include <bits/stdc++.h>
+using namespace std;
+  
+int buffer=0;
+mutex m;
+void Increment(const char* threadNumber,int val)
+{
+    lock_guard<mutex>lock(m);
+    for(int i=1;i<=val;i++)
+    {
+        buffer++;
+    }
+}
+
+int main() {
+  thread t1(Increment,"T0",10);
+  thread t2(Increment,"T1",10);
+  t1.join();
+  t2.join();
+  cout<<"Buffer value is :"<<buffer;
+    return 0;
+}
+
+o/p: Buffer value is:20
+
+
+
+
+
+
+Eg:
+#include <bits/stdc++.h>
+using namespace std;
+  
+int buffer=0;
+mutex m;
+void Increment(const char* threadNumber,int val)
+{
+    lock_guard<mutex>lock(m);
+    for(int i=1;i<=val;i++)
+    {
+        buffer++;
+         cout<<threadNumber<<" Buffer value is :"<<buffer<<endl;
+    }
+}
+
+int main() {
+  thread t1(Increment,"T0",10);
+  thread t2(Increment,"T1",10);
+  t1.join();
+  t2.join();
+ 
+    return 0;
+}
+
+
+o/p:
+T0 Buffer value is :1
+T0 Buffer value is :2
+T0 Buffer value is :3
+T0 Buffer value is :4
+T0 Buffer value is :5
+T0 Buffer value is :6
+T0 Buffer value is :7
+T0 Buffer value is :8
+T0 Buffer value is :9
+T0 Buffer value is :10
+T1 Buffer value is :11
+T1 Buffer value is :12
+T1 Buffer value is :13
+T1 Buffer value is :14
+T1 Buffer value is :15
+T1 Buffer value is :16
+T1 Buffer value is :17
+T1 Buffer value is :18
+T1 Buffer value is :19
+T1 Buffer value is :20
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                10. unique lock in c++
+
+*TOPIC: unique lock in c++ (std::unique_lock<mutex>lock(m1))
+
+  0.The  class unique lock is a mutex ownership wrapper.
+
+  1.It allows:
+    a.Can have different locking stragieces.
+    b.Time constrained attempts  at locking (try_lock_for,try_lock_until).
+    c.recursive locking.
+    d.transfer of lock ownership (move not copy).
+    e.condition variables
+
+Locking stratagieces:
+  a. defer_lock -do not accquire ownership of the mutex.
+  b. try_to_lock -try to accquire ownership of the mutex with bocking.
+  c. adopt_lock -assuming the calling thread already has ownership of the mutex.
+
+
+
+
+Eg1:
+#include <bits/stdc++.h>
+using namespace std;
+  
+int buffer=0;
+mutex m;
+void Increment(const char* threadNumber,int val)
+{
+    unique_lock<mutex>lock(m);//Automatically calls  lock on mutex m
+    for(int i=1;i<=val;i++)
+    {
+        buffer++;
+         cout<<threadNumber<<" Buffer value is :"<<buffer<<endl;
+    }
+}
+
+int main() {
+  thread t1(Increment,"T0",10);
+  thread t2(Increment,"T1",10);
+  t1.join();
+  t2.join();
+ 
+    return 0;
+}
+
+o/p:
+T0 Buffer value is :1
+T0 Buffer value is :2
+T0 Buffer value is :3
+T0 Buffer value is :4
+T0 Buffer value is :5
+T0 Buffer value is :6
+T0 Buffer value is :7
+T0 Buffer value is :8
+T0 Buffer value is :9
+T0 Buffer value is :10
+T1 Buffer value is :11
+T1 Buffer value is :12
+T1 Buffer value is :13
+T1 Buffer value is :14
+T1 Buffer value is :15
+T1 Buffer value is :16
+T1 Buffer value is :17
+T1 Buffer value is :18
+T1 Buffer value is :19
+T1 Buffer value is :20
+
+
+
+
+
+
+Eg2:  used locking stratagieces( defer_lock)
+
+#include <bits/stdc++.h>
+using namespace std;
+  
+int buffer=0;
+mutex m;
+void Increment(const char* threadNumber,int val)
+{
+    unique_lock<mutex>lock(m,defer_lock);//Does not call lock on mutex m1,because used defer_lock.
+        //some piece of code
+    lock.lock();//But then we will have to eplicitly tell to lock when ever we want to lock the mutex m.
+    for(int i=1;i<=val;i++)
+    {
+        buffer++;
+         cout<<threadNumber<<" Buffer value is :"<<buffer<<endl;
+    }
+}
+
+int main() {
+  thread t1(Increment,"T0",10);
+  thread t2(Increment,"T1",10);
+  t1.join();
+  t2.join();
+ 
+    return 0;
+}
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-
+                                                                          11. condition variable in c++
+
+Topic: condition variable in c++ threading:
+
+
+Important point: conditional variable is  used for two purposes
+    a.Notify other threads
+    b.waiting for some conditions
+
+1. condition variable allows running threads to wait on some conditions  and once those conditions are met the  waiting thread is notified using:
+  a.notify_one()
+  .notify_all()
+
+2.you need mutex to use conditional variable.
+
+3.If some thread want to wait on some condition then it has to do these things:
+  a.Acquire the mutex lock using std::unique_lock<std::mutex>lock(m);.
+  b.Execute wait, wait_for,or wait_until.The wait operations automatically release the mutex and suspend the execution of the thread.
+  c.when the condition variable is notified ,the thread is awakend ,and the mutex is automatically reacquired.The thread should then check the condition and resume  waiting if the wake up was supirious.
+
+Note:
+  1.condition variables(cv)are used to synchronize  two or more threads.
+  2.Best use case of condition variable is prodecure/consumer variable.
+
+
+
+
+Eg:
+#include <iostream>
+#include<thread>
+#include<mutex>
+#include<condition_variable>
+using namespace std;
+mutex m;
+int balance=0;
+condition_variable cv;
+void addMoney(int money)
+{
+  lock_guard<mutex>lg(m);
+  balance+=money;
+  cout<<"Amount added to current balance :"<<money<<endl;
+  cout<<"Current balance is :"<<balance<<endl;
+  cv.notify_one();
+}
+void withdrawMoney(int money)
+{
+  unique_lock<mutex>ul(m);
+  cv.wait(ul,[]{return (balance!=0)?true:false;});
+  if(balance>=money)
+  {
+    balance-=money;
+    cout<<"Deducted Amount is: "<<money<<endl;
+  }
+  else
+  {
+    cout<<"Amount can't be deducted.current Balance is less than "<<money<<endl;
+  }
+  cout<<"Current balance is :"<<balance<<endl;
+}
+int main()
+{
+  thread t1(withdrawMoney,500);
+  thread t2(addMoney,2000);
+  t1.join();
+  t2.join();
+  return 0;
+}
+
+
+o/p:
+Amount added to current balance :2000
+Current balance is :2000
+Deducted Amount is: 500
+Current balance is :1500
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+
+                                                                            12. DeadLock in C++
+
+
+*A deadlock in C++ multithreading occurs when two or more threads are blocked forever, each waiting for the other to release a resource that it holds. In other words, it's a situation where a set of threads are unable to proceed because each is waiting for the other to release a lock, resulting in a cyclic waiting dependency.
+
+Eg:
+#include <iostream>
+#include<thread>
+#include<mutex>
+using namespace std;
+mutex m1,m2;
+void thread1()
+{
+  m1.lock();
+  this_thread::sleep_for(chrono::seconds(2));
+  m2.lock();
+  cout<<"Critical section of thread thread one!"<<endl;
+  m1.unlock();
+  m2.unlock();
+}
+void thread2()
+{
+  m2.lock();
+  this_thread::sleep_for(chrono::seconds(2));
+  m1.lock();
+  cout<<"Critical section of thread thread two!"<<endl;
+  m2.unlock();
+  m1.unlock();
+}
+int main()
+{
+  thread t1(thread1);
+  thread t2(thread2);
+  t1.join();
+  t2.join();
+  return 0;
+}
+o/p:
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                            13.Thread synchronisation
+
+TOPIC: Thread/process synchronization
+
+  Note:We will use only thread examples to explain this topic
+
+  POINTS:
+    1.Thread or process synchronize to access critical section.
+    2.critical section is one or collection  of program statements which should be executed by only one thread or process at a time.
+
+
+
+
+Eg:
+#include <iostream>
+#include<thread>
+#include<mutex>
+using namespace std;
+mutex m1;
+int bankBalance=0;
+void thread1(int money)
+{
+  m1.lock();
+  bankBalance+=money;
+  m1.unlock();
+}
+
+int main()
+{
+  thread t1(thread1,100);
+  thread t2(thread1,50);
+  t1.join();
+  t2.join();
+  cout<<"Bank Balance:"<<bankBalance<<endl;
+  return 0;
+}
+
+o/p:
+Bank Balance: 150
+
+
+Note:Here, synchronization can be done with mutex using lock() and unlock()
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                                14. std::lock in c++
+
+
+*TOPIC: std::lock() in c++11
+
+  1.It is used to lock multiple mutex at a time.
+    syntax: std::lock(m1,m2,m3,....mn)
+
+  2.All arguments are locked  via a sequence of calls to lock(), try_lock(), or unlock() on each argument.
+
+  3.Order of locking is not defined (it will try to lock  provided mutex in any order and ensure that  there is on deadlock).
+
+  4.It is a blocking call.
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                             15.promise and future in c++
+
+
+*TOPIC: std::future and std::promise in c++ threading
+
+
+Notes:
+  1. std::promise
+    -used to set values or exceptions.
+
+  2.std::future
+    -used to get values from promise.
+    -Ask promise ,if value is available.
+    -wait for the promise
 
 
 
