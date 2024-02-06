@@ -1093,7 +1093,261 @@ Notes:
 
 
 
+Note: promise is like setter & future is like getter
 
+Eg:
+#include<bits/stdc++.h>
+using namespace std;
+void findSum(promise<int>&&promiseSum,int start,int end)
+{
+    int sum=0;
+    for(int i=start;i<=end;i++)
+    {
+        sum+=i;
+    }
+    promiseSum.set_value(sum);
+}
+int main(void)
+{
+    int start=1,end=5;
+    promise<int>sum;
+    future<int>futureSum=sum.get_future();
+    cout<<"Thread created!"<<endl;
+    thread threadsum(findSum,move(sum),start,end);
+    cout<<"Waiting for result!!"<<endl;
+    cout<<futureSum.get()<<endl;
+    cout<<"Completed!"<<endl;
+    threadsum.join();
+    return 0; 
+}
+
+
+o/p:
+Thread created!
+Waiting for result!
+15
+Completed
+
+
+Eg:printing odd numbers
+#include<bits/stdc++.h>
+using namespace std;
+void findodd(promise<vector<int>>&&oddpromise,int start,int end)
+{
+    vector<int>oddNumbers;
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2 !=0)
+        {
+            oddNumbers.push_back(i);
+        }
+    }
+    oddpromise.set_value(move(oddNumbers));
+    
+}
+int main()
+{
+    int start=1,end=5;
+    promise<vector<int>>oddpromise;
+    future<vector<int>>oddfuture=oddpromise.get_future();
+    cout<<"Thread created!"<<endl;
+    thread threadOddSum(findodd,move(oddpromise),start,end);
+    cout<<"Waiting for result!"<<endl;
+vector<int>result=oddfuture.get();
+cout<<"Odd Numbers\n";
+for(auto i :result)
+{
+    cout<<i<<" ";
+}
+    cout<<"Completed!"<<endl;
+    threadOddSum.join();
+}
+
+o/p:
+Thread created!
+Waiting for result!
+Odd Numbers
+1 3 5 Completed!
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                  16. std::async in c++ | create a Task
+
+
+
+Topic: std::async
+
+1.It runs a function asynchronously and returns std::fututre that will hold the result.
+2.There are 3 launch policies for creating task:
+  a. std::launch::async
+  b. std::launch::deffered
+  c.std::launch::async | std::launch::deffered
+
+How it works?
+1.It automatically creates a thread  and promise object for use.
+2.Then passes std::promise object to thread function and returns the associated stf::future object.
+3.when our passed argument function exists then its value will be set in this promise object,so eventually return a value will be available in std::future object
+
+
+
+
+
+
+
+Eg: using std::launch::deferred policy
+
+#include<bits/stdc++.h>
+using namespace std;
+int oddSum(int start,int end)
+{
+    int sum=0;
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2 !=0)
+        {
+            sum+=i;
+        }
+    }
+    return sum;
+}
+int main()
+{
+    cout<<"Thread created with std::launch deferred policy!"<<endl;
+    future<int>future_sum=async(std::launch::deferred,oddSum,1,5);//it will wait for some one
+    cout<<"Waiting for result!"<<endl;
+    cout<<future_sum.get()<<endl;
+    return 0;
+   
+}
+
+
+o/p:
+Thread created with std::launch deferred policy!
+Waiting for result!
+9
+
+
+
+
+Eg:
+#include<bits/stdc++.h>
+using namespace std;
+int oddSum(int start,int end)
+{
+    cout<<"Thread ID :"<<this_thread::get_id()<<endl;
+    int sum=0;
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2 !=0)
+        {
+            sum+=i;
+        }
+    }
+    return sum;
+}
+int main()
+{
+    cout<<"Thread created with std::launch async policy!"<<endl;
+    cout<<"Thread ID :"<<this_thread::get_id()<<endl;
+    future<int>future_sum=async(std::launch::async,oddSum,1,5);
+    cout<<"Waiting for result!"<<endl;
+    cout<<future_sum.get()<<endl;
+    return 0;
+   
+}
+
+o/p:
+
+Thread created with std::launch async policy!
+Thread ID :139762745336768
+Waiting for result!
+Thread ID :139762745321024
+9
+
+
+
+
+
+
+
+
+
+
+
+
+
+Eg: using std::launch::async policy
+
+#include<bits/stdc++.h>
+using namespace std;
+int oddSum(int start,int end)
+{
+    int sum=0;
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2 !=0)
+        {
+            sum+=i;
+        }
+    }
+    return sum;
+}
+int main()
+{
+    cout<<"Thread created with std::launch async policy!"<<endl;
+    future<int>future_sum=async(std::launch::async,oddSum,1,5);//It will not wait for someone,as soon as it will hit this line,thread will created and start running
+    cout<<"Waiting for result!"<<endl;
+    cout<<future_sum.get()<<endl;
+    return 0;
+   
+}
+
+
+o/p:
+Thread created with std::launch async policy!
+Waiting for result!
+9
+
+
+
+
+
+Eg:
+#include<bits/stdc++.h>
+using namespace std;
+int oddSum(int start,int end)
+{
+    cout<<"Thread ID :"<<this_thread::get_id()<<endl;
+    int sum=0;
+    for(int i=start;i<=end;i++)
+    {
+        if(i%2 !=0)
+        {
+            sum+=i;
+        }
+    }
+    return sum;
+}
+int main()
+{
+    cout<<"Thread created with std::launch async policy!"<<endl;
+    cout<<"Thread ID :"<<this_thread::get_id()<<endl;
+    future<int>future_sum=async(std::launch::async,oddSum,1,5);
+    cout<<"Waiting for result!"<<endl;
+    cout<<future_sum.get()<<endl;
+    return 0;
+   
+}
+
+o/p:
+Thread created with std::launch deferred policy!
+Thread ID :140238487536576
+Waiting for result!
+Thread ID :140238487520832
+9
 
 
 
