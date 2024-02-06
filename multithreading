@@ -1,6 +1,9 @@
                                                                                     1. MULTITHREADING(Thread in c++11)
 
 
+*Multithreading is a concurrent execution model,where multiple threads runs independtly within a single process.
+*Thread is a smallest unit of a computer program that can be scheduled by an operating system scheduler.
+*In a multithreaded program, multiple threads execute independently and share the same resources, such as memory space and file descriptors, within a process.
 
 1.In every application there is a default thread which is main(), inside this we create another threads.
 2.Thread is a lightweight process. Idea of thread is to achieve parallesim by dividing process into multiple threads.
@@ -1298,7 +1301,7 @@ int oddSum(int start,int end)
 int main()
 {
     cout<<"Thread created with std::launch async policy!"<<endl;
-    future<int>future_sum=async(std::launch::async,oddSum,1,5);//It will not wait for someone,as soon as it will hit this line,thread will created and start running
+    future<int>future_sum=async(std::launch::async,oddSum,1,5);//It will not wait for someone,as soon as it will hit this line,thread will created and start running.
     cout<<"Waiting for result!"<<endl;
     cout<<future_sum.get()<<endl;
     return 0;
