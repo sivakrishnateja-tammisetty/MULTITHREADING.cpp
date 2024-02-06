@@ -1379,7 +1379,14 @@ POINTS:
   2.wait on condition variable ,it is like there is a condition variable in a thread and wait is applied to that cv but its end up putting thread in waiting state.
 
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+                                                                              18.Binary semaphore
+
+
+*semaphore is used for signalling.
+*mutex is used for ownership.
 
 
    
