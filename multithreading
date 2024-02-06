@@ -1353,6 +1353,33 @@ Thread ID :140238487520832
 9
 
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                    17. sleep vs wait in threading
+
+
+
+sleep:
+-----
+I'm done with my timeslice , and please dont give me another one for atleast 'n' milliseconds .The os doesn't even try to schedule the sleeping thread until requested time has passed.
+
+ POINTS:
+  1.It will keep the lock and sleep.
+  2.sleep is directly to thread,it is a thread function.
+
+
+
+wait:
+-----
+
+I'm done with my timeslice,.Don't give me another timeslice until someones notify() or notifyAll().As with sleep(),the os won't even try to schedule your task unlesssomeone calls notify() .
+POINTS:
+  1.It releases the lock and wait.
+  2.wait on condition variable ,it is like there is a condition variable in a thread and wait is applied to that cv but its end up putting thread in waiting state.
+
+
+
 
 
    
